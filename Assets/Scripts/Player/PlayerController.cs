@@ -1,50 +1,44 @@
+using System;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    private float speed = 5f;
+    private float speed = 3f;
     private InputManager input => DI.di.input;
     private CharacterController controller;
-    private Vector3 playerVelocity;
-    private bool groundedPlayer;
-    private float jumpHeight = 1.0f;
-    private float gravityValue = -9.81f;
-    private float rotationSpeed = 5f;
+    private Transform cameraTrans;
 
     private void Awake()
     {
         controller = GetComponent<CharacterController>();
+        cameraTrans = Camera.main.transform;
     }
 
+    private void Start()
+    {
+#if UNITY_EDITOR
+        speed = 100f;
+#endif
+    }
     private void Update()
     {
-        CheckAndKeepPlayerOnGround();
         CheckInputAndMovePlayer();
-        CheckAndJump();
-        BringPlayerOnToGround();
-        ControllPlayerRotation();
+        CheckForwardRay();
     }
 
-    private void BringPlayerOnToGround()
-    {
-        playerVelocity.y += gravityValue * Time.deltaTime;
-        controller.Move(playerVelocity * Time.deltaTime);
-    }
 
-    private void CheckAndKeepPlayerOnGround()
+    private void CheckForwardRay()
     {
-        groundedPlayer = controller.isGrounded;
-        if (groundedPlayer && playerVelocity.y < 0) playerVelocity.y = 0f;
-    }
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, transform.forward, out hit, 10f))
+        {
+            Debug.DrawRay(transform.position, transform.forward * hit.distance, Color.red);
 
-    private void ControllPlayerRotation()
-    {
-        
-    }
-
-    private void CheckAndJump()
-    {
-        
+        }
+        else
+        {
+            Debug.DrawRay(transform.position, transform.forward * 10f, Color.green);
+        }
     }
 
     private void CheckInputAndMovePlayer()
